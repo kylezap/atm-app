@@ -130,15 +130,12 @@ function PinSlots({ pin }: { pin: string }) {
   );
 }
 
-function BalanceSidebarCard({ balance }: { balance: number }) {
+function WelcomeSidebarCard() {
   return (
-    <section className="atm-aside-block atm-aside-block--balance" aria-live="polite">
-      <p className="atm-aside-block__label">Current balance</p>
-      <strong
-        className={`atm-balance-value${balance < 0 ? " atm-balance-value--negative" : ""}`}
-      >
-        {formatCurrency(balance)}
-      </strong>
+    <section className="atm-aside-block" aria-live="polite">
+      <p className="atm-aside-block__label">Customer</p>
+      <strong>Ash Catchem</strong>
+      <p className="atm-helper">Welcome back. Choose a service from the main menu to continue.</p>
     </section>
   );
 }
@@ -284,10 +281,8 @@ export function AtmPage() {
   const currentResult = summary?.withdrawals[resultIndex] ?? null;
   const customAmountHelper = getCustomAmountHelper(customAmountValue);
   const customAmountIsValid = isSupportedCustomAmount(Number(customAmountValue));
-  const machineNotesExtra =
-    isPinVerified || summary
-      ? <TransactionHistoryList entries={transactionHistory} />
-      : undefined;
+  const authenticatedSidebarPrimary =
+    isPinVerified || summary ? <WelcomeSidebarCard /> : undefined;
 
   function resetSession() {
     setScreen("idle");
@@ -582,10 +577,7 @@ export function AtmPage() {
         headline="Choose a service"
         lead="Start with quick cash, review your balance, inspect previous transactions, or enter a custom withdrawal amount."
         sessionLabel="Authenticated"
-        sidebarPrimary={
-          currentBalance !== null ? <BalanceSidebarCard balance={currentBalance} /> : null
-        }
-        machineNotesExtra={machineNotesExtra}
+        sidebarPrimary={authenticatedSidebarPrimary}
         footer={
           <div className="atm-actions">
             <button
@@ -636,10 +628,7 @@ export function AtmPage() {
         headline="PIN verified"
         lead="Authentication succeeded. Loading your account before opening the main menu."
         sessionLabel="Please wait"
-        sidebarPrimary={
-          currentBalance !== null ? <BalanceSidebarCard balance={currentBalance} /> : null
-        }
-        machineNotesExtra={machineNotesExtra}
+        sidebarPrimary={authenticatedSidebarPrimary}
       >
         <div className="processing-screen" aria-live="polite">
           <div className="processing-screen__pulse" />
@@ -658,9 +647,7 @@ export function AtmPage() {
         headline="Previous transactions"
         lead="Review the latest withdrawals recorded for this session before returning to the main menu."
         sessionLabel="Authenticated"
-        sidebarPrimary={
-          currentBalance !== null ? <BalanceSidebarCard balance={currentBalance} /> : null
-        }
+        sidebarPrimary={authenticatedSidebarPrimary}
         footer={
           <div className="atm-actions">
             <button
@@ -690,10 +677,7 @@ export function AtmPage() {
         headline="Current balance"
         lead="Review your available balance, then return to the main menu for another action."
         sessionLabel="Authenticated"
-        sidebarPrimary={
-          currentBalance !== null ? <BalanceSidebarCard balance={currentBalance} /> : null
-        }
-        machineNotesExtra={machineNotesExtra}
+        sidebarPrimary={authenticatedSidebarPrimary}
         footer={
           <div className="atm-actions">
             <button
@@ -743,10 +727,7 @@ export function AtmPage() {
         headline="Choose your withdrawal amount"
         lead="Use one of the machine presets or open the keypad for a custom amount."
         sessionLabel="Single withdrawal session"
-        sidebarPrimary={
-          currentBalance !== null ? <BalanceSidebarCard balance={currentBalance} /> : null
-        }
-        machineNotesExtra={machineNotesExtra}
+        sidebarPrimary={authenticatedSidebarPrimary}
         footer={
           <div className="atm-actions">
             <button
@@ -778,10 +759,7 @@ export function AtmPage() {
         headline="Enter your withdrawal amount"
         lead="The ATM only dispenses exact amounts in £5 steps."
         sessionLabel="Single withdrawal session"
-        sidebarPrimary={
-          currentBalance !== null ? <BalanceSidebarCard balance={currentBalance} /> : null
-        }
-        machineNotesExtra={machineNotesExtra}
+        sidebarPrimary={authenticatedSidebarPrimary}
         footer={
           <div className="atm-actions">
             <button
@@ -816,10 +794,7 @@ export function AtmPage() {
         headline={`Confirm ${formatCurrency(pendingAmount)} withdrawal`}
         lead="The ATM will validate balance and notes, then attempt this withdrawal."
         sessionLabel="Single withdrawal session"
-        sidebarPrimary={
-          currentBalance !== null ? <BalanceSidebarCard balance={currentBalance} /> : null
-        }
-        machineNotesExtra={machineNotesExtra}
+        sidebarPrimary={authenticatedSidebarPrimary}
         footer={
           <div className="atm-actions">
             <button className="atm-action-button" onClick={handleConfirmAmount} type="button">
@@ -886,10 +861,7 @@ export function AtmPage() {
         headline="Running your withdrawal"
         lead="The machine is processing your selected amount."
         sessionLabel="Please wait"
-        sidebarPrimary={
-          currentBalance !== null ? <BalanceSidebarCard balance={currentBalance} /> : null
-        }
-        machineNotesExtra={machineNotesExtra}
+        sidebarPrimary={authenticatedSidebarPrimary}
       >
         <div className="processing-screen" aria-live="polite">
           <div className="processing-screen__pulse" />
@@ -919,21 +891,16 @@ export function AtmPage() {
             : "The ATM could not complete the withdrawal and left your balance unchanged."
         }
         sessionLabel="Single withdrawal result"
-        sidebarPrimary={
-          currentBalance !== null ? <BalanceSidebarCard balance={currentBalance} /> : null
-        }
-        machineNotesExtra={machineNotesExtra}
+        sidebarPrimary={authenticatedSidebarPrimary}
         footer={
           <div className="atm-actions">
-            {currentResult.status === "success" ? (
-              <button
-                className="atm-action-button atm-action-button--secondary"
-                onClick={returnToMainMenu}
-                type="button"
-              >
-                Main menu
-              </button>
-            ) : null}
+            <button
+              className="atm-action-button atm-action-button--secondary"
+              onClick={returnToMainMenu}
+              type="button"
+            >
+              Main menu
+            </button>
             <button className="atm-action-button" onClick={advanceResult} type="button">
               Finish session
             </button>
@@ -953,10 +920,7 @@ export function AtmPage() {
         headline="ATM session complete"
         lead="The monitor now closes with a receipt-style summary instead of scattered result cards."
         sessionLabel="Session finished"
-        sidebarPrimary={
-          currentBalance !== null ? <BalanceSidebarCard balance={currentBalance} /> : null
-        }
-        machineNotesExtra={machineNotesExtra}
+        sidebarPrimary={authenticatedSidebarPrimary}
         footer={
           <div className="atm-actions">
             <button className="atm-action-button" onClick={resetSession} type="button">

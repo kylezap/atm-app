@@ -62,12 +62,38 @@ const overdraftSummary = {
   ],
 };
 
+const failedSummary = {
+  authenticated: true,
+  startingBalance: 220,
+  withdrawals: [
+    {
+      amount: 40,
+      status: "failed" as const,
+      reason: "INSUFFICIENT_NOTES" as const,
+    },
+  ],
+  endingBalance: 220,
+  remainingNotes: { 5: 0, 10: 0, 20: 1 },
+  recentTransactions: [
+    {
+      amount: 40,
+      status: "failed" as const,
+      reason: "INSUFFICIENT_NOTES" as const,
+    },
+  ],
+};
+
 async function findMainMenuHeading() {
   return screen.findByRole(
     "heading",
     { name: /choose a service/i, level: 2 },
     { timeout: 4000 },
   );
+}
+
+function expectAuthenticatedSidebar() {
+  expect(screen.getByText(/ash catchem/i)).toBeInTheDocument();
+  expect(screen.queryByText(/^current balance$/i)).toBeNull();
 }
 
 describe("AtmPage", () => {
@@ -118,8 +144,7 @@ describe("AtmPage", () => {
 
     expect(await screen.findByRole("heading", { name: /pin verified/i, level: 2 })).toBeInTheDocument();
     expect(await findMainMenuHeading()).toBeInTheDocument();
-    expect(screen.getByText(/^current balance$/i)).toBeInTheDocument();
-    expect(screen.getByText("£220")).toBeInTheDocument();
+    expectAuthenticatedSidebar();
     expect(screen.getByRole("button", { name: /quick cash/i })).toBeInTheDocument();
     expect(screen.queryByText(/session sequence/i)).toBeNull();
 
@@ -143,10 +168,7 @@ describe("AtmPage", () => {
     expect(
       await screen.findByRole("heading", { name: /atm session complete/i, level: 2 }),
     ).toBeInTheDocument();
-    expect(screen.getByText("£180")).toBeInTheDocument();
-    expect(screen.getAllByText(/^previous transactions$/i).length).toBeGreaterThan(0);
-    expect(screen.getByText("£40 dispensed")).toBeInTheDocument();
-    expect(screen.getByText("Balance now £180")).toBeInTheDocument();
+    expect(screen.getByText(/£220 to £180/)).toBeInTheDocument();
   });
 
   it("returns to the main menu from the success screen", async () => {
@@ -184,9 +206,42 @@ describe("AtmPage", () => {
     expect(
       await findMainMenuHeading(),
     ).toBeInTheDocument();
-    expect(screen.getByText("£180")).toBeInTheDocument();
-    expect(screen.getAllByText(/^previous transactions$/i).length).toBeGreaterThan(0);
-    expect(screen.getByText("£40 dispensed")).toBeInTheDocument();
+    expectAuthenticatedSidebar();
+  });
+
+  it("returns to the main menu from the stopped screen", async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          authenticated: true,
+          currentBalance: 220,
+          recentTransactions: [],
+        }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => failedSummary,
+      } as Response);
+
+    const user = userEvent.setup();
+    render(<AtmPage />);
+
+    await user.click(screen.getByRole("button", { name: /start session/i }));
+    await user.type(screen.getByLabelText(/pin code/i), "1111");
+    await user.keyboard("{Enter}");
+
+    await findMainMenuHeading();
+    await user.click(screen.getByRole("button", { name: /quick cash/i }));
+    await user.click(screen.getByRole("button", { name: "£40" }));
+    await user.click(screen.getByRole("button", { name: /confirm amount/i }));
+
+    await screen.findByRole("heading", { name: /withdrawal could not be completed/i, level: 2 });
+    await user.click(screen.getByRole("button", { name: /main menu/i }));
+
+    expect(await findMainMenuHeading()).toBeInTheDocument();
+    expectAuthenticatedSidebar();
   });
 
   it("shows the balance screen from the home menu and returns back", async () => {
@@ -212,6 +267,7 @@ describe("AtmPage", () => {
 
     expect(await screen.findByRole("heading", { name: /current balance/i, level: 2 })).toBeInTheDocument();
     expect(screen.getAllByText("£220")).not.toHaveLength(0);
+    expect(screen.getByText(/ash catchem/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /back to main menu/i }));
 
@@ -238,6 +294,7 @@ describe("AtmPage", () => {
     await user.keyboard("{Enter}");
 
     await findMainMenuHeading();
+    expectAuthenticatedSidebar();
     await user.click(screen.getByRole("button", { name: /previous transactions/i }));
 
     expect(
@@ -300,9 +357,13 @@ describe("AtmPage", () => {
     await user.type(screen.getByLabelText(/pin code/i), "1111");
     await user.keyboard("{Enter}");
 
+    await findMainMenuHeading();
+    await user.click(screen.getByRole("button", { name: /see current balance/i }));
+
     const negativeBalance = await screen.findByText("-£20");
     expect(negativeBalance).toHaveClass("atm-balance-value--negative");
 
+    await user.click(screen.getByRole("button", { name: /back to main menu/i }));
     await findMainMenuHeading();
     await user.click(screen.getByRole("button", { name: /quick cash/i }));
     await user.click(screen.getByRole("button", { name: "£20" }));
@@ -328,7 +389,7 @@ describe("AtmPage", () => {
       ),
     );
 
-    expect(await screen.findByText("-£40")).toHaveClass("atm-balance-value--negative");
+    expect(await screen.findByText(/£20 to -£40/)).toHaveClass("receipt-panel__balance--negative");
     expect(screen.getByText(/account remains in overdraft after this withdrawal/i)).toBeInTheDocument();
   });
 
@@ -373,10 +434,6 @@ describe("AtmPage", () => {
     await user.keyboard("{Enter}");
 
     expect(await findMainMenuHeading()).toBeInTheDocument();
-    expect(screen.getByText(/^current balance$/i)).toBeInTheDocument();
-    expect(screen.getByText("£180")).toBeInTheDocument();
-    expect(screen.getAllByText(/^previous transactions$/i).length).toBeGreaterThan(0);
-    expect(screen.getByText("£40 dispensed")).toBeInTheDocument();
-    expect(screen.getByText("Balance now £180")).toBeInTheDocument();
+    expectAuthenticatedSidebar();
   });
 });
