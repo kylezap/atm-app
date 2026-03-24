@@ -14,3 +14,24 @@ export class NotImplementedError extends HttpError {
     this.name = "NotImplementedError";
   }
 }
+
+export class InvalidPinError extends HttpError {
+  constructor(message = "Invalid PIN.") {
+    super(403, message);
+    this.name = "InvalidPinError";
+  }
+}
+
+export class PinApiError extends HttpError {
+  constructor(message = "Unable to verify PIN.") {
+    super(502, message);
+    this.name = "PinApiError";
+  }
+}
+
+export class InvalidPinResponseError extends HttpError {
+  constructor(message = "Unable to verify PIN.") {
+    super(502, message);
+    this.name = "InvalidPinResponseError";
+  }
+}

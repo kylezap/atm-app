@@ -8,7 +8,7 @@ export const pinRequestSchema = z.object({
 });
 
 export const pinApiSuccessResponseSchema = z.object({
-  currentBalance: z.number().int(),
+  currentBalance: z.number(),
 });
 
 export const noteCountsSchema = z.object({
