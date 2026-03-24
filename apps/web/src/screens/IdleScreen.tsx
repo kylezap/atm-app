@@ -17,23 +17,23 @@ export function IdleScreen({ onStartSession }: IdleScreenProps) {
       sessionLabel="Awaiting customer"
       footer={
         <div className="atm-actions">
-          <button className="atm-action-button" onClick={onStartSession} type="button">
+          <button
+            className="atm-action-button"
+            onClick={onStartSession}
+            type="button"
+          >
             Start session
           </button>
         </div>
       }
-      aside={
-        <section className="atm-aside-block">
-          <p className="atm-aside-block__label">Starting inventory</p>
-          <NoteCountList notes={INITIAL_NOTE_COUNTS} />
-        </section>
-      }
     >
       <div className="hero-screen">
-        <p className="hero-screen__status">Hybrid retro / neo-brutalist monitor</p>
+        <p className="hero-screen__status">
+          Hybrid retro / neo-brutalist monitor
+        </p>
         <p>
-          Choose quick cash or enter one custom amount by keypad, then complete the session
-          with a single withdrawal.
+          Choose quick cash or enter one custom amount by keypad, then complete
+          the session with a single withdrawal.
         </p>
       </div>
     </AtmScreenLayout>
