@@ -1,6 +1,6 @@
 import type { PropsWithChildren, ReactNode } from "react";
 
-interface AtmFrameProps extends PropsWithChildren {
+export interface AtmFrameProps extends PropsWithChildren {
   screenLabel: string;
   headline: string;
   lead: string;
@@ -8,7 +8,6 @@ interface AtmFrameProps extends PropsWithChildren {
   sessionLabel: string;
   footer?: ReactNode;
   sidebarPrimary?: ReactNode;
-  machineNotesExtra?: ReactNode;
   aside?: ReactNode;
 }
 
@@ -20,7 +19,6 @@ export function AtmFrame({
   sessionLabel,
   footer,
   sidebarPrimary,
-  machineNotesExtra,
   aside,
   children,
 }: AtmFrameProps) {
@@ -58,18 +56,6 @@ export function AtmFrame({
 
               <aside className="atm-screen__aside">
                 {sidebarPrimary}
-
-                <section className="atm-aside-block">
-                  <p className="atm-aside-block__label">Machine notes</p>
-                  <ul className="atm-bullet-list">
-                    <li>Custom amounts must be entered in increments of £5.</li>
-                    <li>Overdraft maximum is £100.</li>
-                  </ul>
-                  {machineNotesExtra ? (
-                    <div className="atm-aside-block__section">{machineNotesExtra}</div>
-                  ) : null}
-                </section>
-
                 {aside}
               </aside>
             </div>

@@ -1,4 +1,4 @@
-import type { AtmSessionSummary, PinVerificationResult } from "../types/atm";
+import type { AtmSessionSummary, PinVerificationResult } from "@atm/shared";
 
 interface ApiErrorPayload {
   message?: string;
