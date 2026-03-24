@@ -11,22 +11,24 @@ import { healthRoutes } from "./routes/health-routes";
 import { createAtmOrchestrator } from "./services/app-orchestrator";
 import { createPinService } from "./services/pin-service";
 import { createWithdrawalService } from "./services/withdrawal-service";
+import type { AtmOrchestrator } from "./types/atm";
 
-export function createApp() {
+interface CreateAppOptions {
+  orchestrator?: AtmOrchestrator;
+}
+
+export function createApp(options: CreateAppOptions = {}) {
   const app = express();
 
-  const pinApiClient = createPinApiClient();
-  const pinService = createPinService(pinApiClient);
-  const inventory = createInitialInventory();
-  const noteDispenser = createNoteDispenser();
-  const withdrawalService = createWithdrawalService({
-    inventory,
-    noteDispenser,
-  });
-  const orchestrator = createAtmOrchestrator({
-    pinService,
-    withdrawalService,
-  });
+  const orchestrator =
+    options.orchestrator ??
+    createAtmOrchestrator({
+      pinService: createPinService(createPinApiClient()),
+      withdrawalService: createWithdrawalService({
+        inventory: createInitialInventory(),
+        noteDispenser: createNoteDispenser(),
+      }),
+    });
 
   app.use(cors());
   app.use(express.json());
