@@ -11,8 +11,18 @@ export interface PinRequest {
   withdrawals: number[];
 }
 
+export interface PinVerificationRequest {
+  pin: string;
+}
+
 export interface PinApiSuccessResponse {
   currentBalance: number;
+}
+
+export interface PinVerificationResult {
+  authenticated: true;
+  currentBalance: number;
+  recentTransactions: WithdrawalResult[];
 }
 
 export interface FailedWithdrawalResult {
@@ -41,4 +51,5 @@ export interface AtmSessionSummary {
   withdrawals: WithdrawalResult[];
   endingBalance: number;
   remainingNotes: NoteCounts;
+  recentTransactions: WithdrawalResult[];
 }

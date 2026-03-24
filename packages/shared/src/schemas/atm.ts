@@ -7,8 +7,18 @@ export const pinRequestSchema = z.object({
   withdrawals: z.array(z.number().int().positive()).min(1),
 });
 
+export const pinVerificationRequestSchema = z.object({
+  pin: z.string().min(1),
+});
+
 export const pinApiSuccessResponseSchema = z.object({
   currentBalance: z.number(),
+});
+
+export const pinVerificationResultSchema = z.object({
+  authenticated: z.literal(true),
+  currentBalance: z.number(),
+  recentTransactions: z.array(z.lazy(() => withdrawalResultSchema)),
 });
 
 export const noteCountsSchema = z.object({
@@ -38,10 +48,13 @@ export const withdrawalResultSchema = z.union([
   failedWithdrawalResultSchema,
 ]);
 
+export const recentTransactionsSchema = z.array(withdrawalResultSchema);
+
 export const atmSessionSummarySchema = z.object({
   authenticated: z.boolean(),
   startingBalance: z.number().int(),
   withdrawals: z.array(withdrawalResultSchema),
   endingBalance: z.number().int(),
   remainingNotes: noteCountsSchema,
+  recentTransactions: recentTransactionsSchema,
 });

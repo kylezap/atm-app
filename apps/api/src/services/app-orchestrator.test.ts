@@ -9,6 +9,19 @@ describe("createAtmOrchestrator", () => {
     const withdrawals = [140, 50, 90];
     const pinService: PinService = {
       authenticate: vi.fn().mockResolvedValue({ currentBalance: 220 }),
+      setCurrentBalance: vi.fn(),
+      getRecentTransactions: vi.fn().mockReturnValue([
+        {
+          amount: 140,
+          status: "success",
+          dispensedNotes: { 5: 4, 10: 4, 20: 4 },
+          balanceBefore: 220,
+          balanceAfter: 80,
+          overdraftWarning: false,
+          remainingNotes: { 5: 0, 10: 11, 20: 3 },
+        },
+      ]),
+      recordTransaction: vi.fn(),
     };
     const withdrawalService: WithdrawalService = {
       processSequence: vi.fn().mockResolvedValue({
@@ -38,7 +51,28 @@ describe("createAtmOrchestrator", () => {
     expect(summary.startingBalance).toBe(220);
     expect(summary.endingBalance).toBe(80);
     expect(summary.remainingNotes).toEqual({ 5: 0, 10: 11, 20: 3 });
+    expect(summary.recentTransactions).toEqual([
+      {
+        amount: 140,
+        status: "success",
+        dispensedNotes: { 5: 4, 10: 4, 20: 4 },
+        balanceBefore: 220,
+        balanceAfter: 80,
+        overdraftWarning: false,
+        remainingNotes: { 5: 0, 10: 11, 20: 3 },
+      },
+    ]);
     expect(summary.withdrawals).toHaveLength(1);
     expect(withdrawalService.processSequence).toHaveBeenCalledWith(220, withdrawals);
+    expect(pinService.recordTransaction).toHaveBeenCalledWith({
+      amount: 140,
+      status: "success",
+      dispensedNotes: { 5: 4, 10: 4, 20: 4 },
+      balanceBefore: 220,
+      balanceAfter: 80,
+      overdraftWarning: false,
+      remainingNotes: { 5: 0, 10: 11, 20: 3 },
+    });
+    expect(pinService.setCurrentBalance).toHaveBeenCalledWith(80);
   });
 });

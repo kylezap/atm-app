@@ -7,6 +7,7 @@ import {
   InvalidPinResponseError,
   PinApiError,
 } from "./lib/http-error";
+import type { PinService } from "./services/pin-service";
 import type { AtmOrchestrator } from "./types/atm";
 
 describe("createApp", () => {
@@ -34,6 +35,62 @@ describe("createApp", () => {
     expect(orchestrator.processSession).not.toHaveBeenCalled();
   });
 
+  it("verifies a PIN immediately through the ATM pin endpoint", async () => {
+    const pinService: PinService = {
+      authenticate: vi.fn().mockResolvedValue({ currentBalance: 220 }),
+      setCurrentBalance: vi.fn(),
+      getRecentTransactions: vi.fn().mockReturnValue([
+        {
+          amount: 40,
+          status: "success",
+          dispensedNotes: { 5: 0, 10: 0, 20: 2 },
+          balanceBefore: 220,
+          balanceAfter: 180,
+          overdraftWarning: false,
+          remainingNotes: { 5: 4, 10: 15, 20: 5 },
+        },
+      ]),
+      recordTransaction: vi.fn(),
+    };
+    const app = createApp({ pinService });
+
+    const response = await request(app).post("/api/atm/pin").send({ pin: "1111" });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      authenticated: true,
+      currentBalance: 220,
+      recentTransactions: [
+        {
+          amount: 40,
+          status: "success",
+          dispensedNotes: { 5: 0, 10: 0, 20: 2 },
+          balanceBefore: 220,
+          balanceAfter: 180,
+          overdraftWarning: false,
+          remainingNotes: { 5: 4, 10: 15, 20: 5 },
+        },
+      ],
+    });
+    expect(pinService.authenticate).toHaveBeenCalledWith("1111");
+  });
+
+  it("returns 403 from the immediate PIN endpoint when the PIN is invalid", async () => {
+    const app = createApp({
+      pinService: {
+        authenticate: vi.fn().mockRejectedValue(new InvalidPinError()),
+        setCurrentBalance: vi.fn(),
+        getRecentTransactions: vi.fn().mockReturnValue([]),
+        recordTransaction: vi.fn(),
+      },
+    });
+
+    const response = await request(app).post("/api/atm/pin").send({ pin: "9999" });
+
+    expect(response.status).toBe(403);
+    expect(response.body).toEqual({ message: "Invalid PIN." });
+  });
+
   it("returns the session summary for a valid ATM request", async () => {
     const orchestrator: AtmOrchestrator = {
       processSession: vi.fn().mockResolvedValue({
@@ -42,6 +99,7 @@ describe("createApp", () => {
         withdrawals: [],
         endingBalance: 220,
         remainingNotes: { 5: 4, 10: 15, 20: 7 },
+        recentTransactions: [],
       }),
     };
     const app = createApp({ orchestrator });
@@ -57,6 +115,7 @@ describe("createApp", () => {
       withdrawals: [],
       endingBalance: 220,
       remainingNotes: { 5: 4, 10: 15, 20: 7 },
+      recentTransactions: [],
     });
     expect(orchestrator.processSession).toHaveBeenCalledWith({
       pin: "1111",

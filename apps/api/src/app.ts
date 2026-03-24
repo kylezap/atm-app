@@ -12,18 +12,21 @@ import { createAtmOrchestrator } from "./services/app-orchestrator";
 import { createPinService } from "./services/pin-service";
 import { createWithdrawalService } from "./services/withdrawal-service";
 import type { AtmOrchestrator } from "./types/atm";
+import type { PinService } from "./services/pin-service";
 
 interface CreateAppOptions {
   orchestrator?: AtmOrchestrator;
+  pinService?: PinService;
 }
 
 export function createApp(options: CreateAppOptions = {}) {
   const app = express();
+  const pinService = options.pinService ?? createPinService(createPinApiClient());
 
   const orchestrator =
     options.orchestrator ??
     createAtmOrchestrator({
-      pinService: createPinService(createPinApiClient()),
+      pinService,
       withdrawalService: createWithdrawalService({
         inventory: createInitialInventory(),
         noteDispenser: createNoteDispenser(),
@@ -34,7 +37,7 @@ export function createApp(options: CreateAppOptions = {}) {
   app.use(express.json());
 
   app.use("/api/health", healthRoutes);
-  app.use("/api/atm", createAtmRoutes(orchestrator));
+  app.use("/api/atm", createAtmRoutes(orchestrator, pinService));
 
   app.use((_request: Request, response: Response) => {
     response.status(404).json({ message: "Route not found." });

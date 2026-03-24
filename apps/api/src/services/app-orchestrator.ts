@@ -20,12 +20,19 @@ export function createAtmOrchestrator(
         [...input.withdrawals],
       );
 
+      for (const withdrawal of sequenceResult.withdrawals) {
+        options.pinService.recordTransaction(withdrawal);
+      }
+
+      options.pinService.setCurrentBalance(sequenceResult.endingBalance);
+
       return {
         authenticated: true,
         startingBalance: authenticationResult.currentBalance,
         withdrawals: sequenceResult.withdrawals,
         endingBalance: sequenceResult.endingBalance,
         remainingNotes: sequenceResult.remainingNotes,
+        recentTransactions: options.pinService.getRecentTransactions(),
       };
     },
   };
