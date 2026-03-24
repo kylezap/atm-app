@@ -81,14 +81,14 @@ Initial cash total: `310`
 “Distribute the notes as evenly as possible” is defined here as:
 
 1. Find all exact note combinations that satisfy the requested amount using the remaining inventory.
-2. Prefer the combination with the lowest spread between note usage counts across denominations actually used.
+2. Prefer the combination with the lowest spread between note usage counts across all supported denominations, including zero for unused denominations.
 3. If multiple combinations are equally even, prefer the one using fewer total notes.
 4. If still tied, prefer the one using larger denominations first.
 5. If no exact combination exists, reject the withdrawal.
 
 ### Practical interpretation
 
-This means the app should avoid overly skewed combinations when a more balanced combination is available, but it should still remain deterministic.
+This means the app should avoid overly skewed combinations and should treat unused denominations as part of the balance calculation, but it should still remain deterministic.
 
 ### Deterministic examples
 
@@ -103,7 +103,7 @@ instead of:
 - `2 x £20`
 - `1 x £10`
 
-because the first mix is more evenly distributed across denominations.
+because the first mix has note counts of `1, 2, 2`, while the second has `2, 1, 0`, so the first is more evenly distributed across all supported denominations.
 
 ## Balance Rule
 
@@ -160,15 +160,15 @@ The app should return structured results per withdrawal.
     {
       "amount": 140,
       "status": "success",
-      "dispensedNotes": { "20": 3, "10": 1, "5": 2 },
+      "dispensedNotes": { "20": 4, "10": 4, "5": 4 },
       "balanceBefore": 220,
       "balanceAfter": 80,
       "overdraftWarning": false,
-      "remainingNotes": { "20": 4, "10": 14, "5": 2 }
+      "remainingNotes": { "20": 3, "10": 11, "5": 0 }
     }
   ],
   "endingBalance": 80,
-  "remainingNotes": { "20": 4, "10": 14, "5": 2 }
+  "remainingNotes": { "20": 3, "10": 11, "5": 0 }
 }
 ```
 
