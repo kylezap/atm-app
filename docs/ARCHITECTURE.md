@@ -57,6 +57,10 @@ atm-app/
 |       |   `-- styles.css                # App styles
 |       |-- vite.config.ts                # Dev server + /api proxy
 |       `-- package.json
+|-- docs/
+|   |-- ARCHITECTURE.md                   # Technical architecture and flow
+|   |-- DEVELOPMENT_FLOW.md               # Project evolution and decisions
+|   `-- PLANS.md                          # Original implementation spec
 |-- packages/
 |   `-- shared/
 |       |-- src/
@@ -68,7 +72,7 @@ atm-app/
 |       |   |   `-- atm.ts                # Shared domain and API types
 |       |   `-- index.ts                  # Shared exports
 |       `-- package.json
-|-- PLANS.md                              # Original implementation spec
+|-- README.md                             # Product overview and local workflows
 |-- package.json                          # Workspace scripts
 `-- tsconfig.base.json
 ```

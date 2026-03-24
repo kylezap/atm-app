@@ -1,90 +1,113 @@
 # ATM App
 
-TypeScript monorepo for a lightweight ATM flow with:
+ATM simulator built as a TypeScript monorepo with:
 
-- `apps/web`: React + Vite UI for entering a PIN and a runtime withdrawal sequence
-- `apps/api`: Express API that authenticates the PIN, processes withdrawals, and returns a session summary
-- `packages/shared`: shared constants, Zod schemas, and TypeScript types
+- `apps/web`: React + Vite frontend
+- `apps/api`: Express backend
+- `packages/shared`: shared constants, schemas, and types
 
-## Behavior
+The app lets a customer verify a PIN, open an ATM-style main menu, review balance and recent transactions, choose a withdrawal amount, and receive a receipt-style result. The backend enforces exact note dispensing, overdraft limits, and stop-on-first-failure session behavior.
 
-- The caller provides `pin` and `withdrawals`
-- The API authenticates once against the external PIN API
-- Withdrawals are processed in order
-- Each withdrawal must be dispensed exactly using fixed `£20`, `£10`, and `£5` notes
-- The ATM chooses the most even exact note combination, then breaks ties by fewer notes and larger denominations
-- Processing stops on the first failure
-- Overdraft is allowed down to `-100`
-- Every successful withdrawal with a negative resulting balance returns an overdraft warning
+State is intentionally kept in memory today rather than stored in a persistent database, so ATM inventory and session-related data reset across server restarts. That keeps the app lightweight for the current scope, while leaving room to add persistent storage later if the product needs cross-session history or durable machine state.
 
-## Quick Start
+## App Features
+
+- PIN verification against the external PIN API
+- ATM main menu with quick cash and custom amount flows
+- Balance and previous transaction screens
+- Exact dispensing using `£20`, `£10`, and `£5` notes
+- Deterministic note selection
+- Overdraft support down to `-100`
+- Receipt-style withdrawal results and session summary
+
+## Installation
+
+Requirements:
+
+- `Node.js` 20+
+- `npm`
+
+Install dependencies from the repo root:
 
 ```bash
 npm install
+```
+
+## Running Locally
+
+Start both apps from the repo root:
+
+```bash
 npm run dev
 ```
 
 This starts:
 
-- web app at `http://localhost:5173`
-- API at `http://localhost:3001`
+- web app: `http://localhost:5173`
+- API: `http://localhost:3001`
 
-## Useful Scripts
+The Vite dev server proxies `/api` requests to the local Express API.
+
+Demo details:
+
+- demo PIN: `1111`
+- web flow starts from the ATM landing screen
+
+## Local Workflows
+
+Run all tests:
 
 ```bash
-npm run dev
-npm run test
+npm test
+```
+
+Run type checks:
+
+```bash
 npm run typecheck
+```
+
+Build all workspaces:
+
+```bash
 npm run build
 ```
 
-## API
+Common development loop:
 
-`POST /api/atm/session`
+1. Run `npm install`
+2. Start the app with `npm run dev`
+3. Make changes in `apps/web`, `apps/api`, or `packages/shared`
+4. Run `npm test`
+5. Run `npm run typecheck`
 
-Request body:
+## API Snapshot
+
+Main endpoints:
+
+- `POST /api/atm/pin`
+- `POST /api/atm/session`
+- `GET /api/health`
+
+Example session request:
 
 ```json
 {
   "pin": "1111",
-  "withdrawals": [140, 50, 90]
+  "withdrawals": [40]
 }
 ```
 
-Successful response shape:
-
-```json
-{
-  "authenticated": true,
-  "startingBalance": 220,
-  "withdrawals": [
-    {
-      "amount": 140,
-      "status": "success",
-      "dispensedNotes": { "5": 4, "10": 4, "20": 4 },
-      "balanceBefore": 220,
-      "balanceAfter": 80,
-      "overdraftWarning": false,
-      "remainingNotes": { "5": 0, "10": 11, "20": 3 }
-    }
-  ],
-  "endingBalance": 80,
-  "remainingNotes": { "5": 0, "10": 11, "20": 3 }
-}
-```
-
-Common error responses:
+Common API responses:
 
 - `400` invalid request body
 - `403` invalid PIN
 - `502` upstream PIN API failure or malformed PIN API response
 
-## Testing
+## Documentation
 
-Current automated coverage includes:
+Additional project docs live in `docs/`:
 
-- PIN API client success and failure handling
-- inventory mutation safety
-- deterministic note dispensing
-- withdrawal sequencing, overdraft rules, and stop-on-first-failure behavior
-- API request validation and PIN-related HTTP error handling
+- `docs/ARCHITECTURE.md`: system structure, runtime flow, and component boundaries
+- `docs/DEVELOPMENT_FLOW.md`: implementation timeline, major decisions, and future features
+- `docs/PLANS.md`: original implementation spec and acceptance criteria
