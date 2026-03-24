@@ -117,6 +117,18 @@ input {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.withdrawal-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.withdrawal-input-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
 .primary-button {
   padding: 12px 16px;
   border: none;
@@ -130,6 +142,24 @@ input {
 .primary-button:disabled {
   cursor: progress;
   opacity: 0.7;
+}
+
+.secondary-button {
+  padding: 12px 16px;
+  border: 1px solid rgba(141, 175, 224, 0.18);
+  border-radius: 12px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.secondary-button--ghost {
+  justify-self: flex-start;
 }
 
 .constraints-grid,

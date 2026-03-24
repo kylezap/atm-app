@@ -6,13 +6,14 @@ interface ApiErrorPayload {
 
 export async function createAtmSession(
   pin: string,
+  withdrawals: number[],
 ): Promise<AtmSessionSummary> {
   const response = await fetch("/api/atm/session", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ pin }),
+    body: JSON.stringify({ pin, withdrawals }),
   });
 
   if (!response.ok) {

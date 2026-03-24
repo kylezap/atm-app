@@ -3,17 +3,12 @@ import {
   INITIAL_NOTE_COUNTS,
   OVERDRAFT_LIMIT,
 } from "@atm/shared";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
 
 import { Panel } from "../../components/Panel";
 import { createAtmSession } from "../../lib/api";
-import type {
-  AtmSessionSummary,
-  NoteCounts,
-  SuccessfulWithdrawalResult,
-  WithdrawalResult,
-} from "../../types/atm";
+import type { AtmSessionSummary, NoteCounts, WithdrawalResult } from "../../types/atm";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-GB", {
@@ -46,29 +41,27 @@ function WithdrawalCard({ result }: { result: WithdrawalResult }) {
     );
   }
 
-  const successfulResult = result as SuccessfulWithdrawalResult;
-
   return (
     <article className="result-card">
       <div className="result-card__row">
-        <strong>{formatCurrency(successfulResult.amount)}</strong>
+        <strong>{formatCurrency(result.amount)}</strong>
         <span>Success</span>
       </div>
       <p>
-        Balance: {formatCurrency(successfulResult.balanceBefore)} to{" "}
-        {formatCurrency(successfulResult.balanceAfter)}
+        Balance: {formatCurrency(result.balanceBefore)} to{" "}
+        {formatCurrency(result.balanceAfter)}
       </p>
       <div className="result-card__details">
         <div>
           <h3>Dispensed notes</h3>
-          <NoteCountList notes={successfulResult.dispensedNotes} />
+          <NoteCountList notes={result.dispensedNotes} />
         </div>
         <div>
           <h3>Remaining notes</h3>
-          <NoteCountList notes={successfulResult.remainingNotes} />
+          <NoteCountList notes={result.remainingNotes} />
         </div>
       </div>
-      {successfulResult.overdraftWarning ? (
+      {result.overdraftWarning ? (
         <p className="warning">Account is in overdraft after this withdrawal.</p>
       ) : null}
     </article>
@@ -110,22 +103,51 @@ function SummaryPanel({ summary }: { summary: AtmSessionSummary }) {
 
 export function AtmPage() {
   const [pin, setPin] = useState("1111");
+  const [withdrawalInputs, setWithdrawalInputs] = useState<string[]>(() =>
+    DEFAULT_WITHDRAWAL_SEQUENCE.map((amount) => String(amount)),
+  );
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState<AtmSessionSummary | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const withdrawals = useMemo(
-    () => [...DEFAULT_WITHDRAWAL_SEQUENCE],
-    [],
-  );
+  function updateWithdrawal(index: number, value: string) {
+    setWithdrawalInputs((current) =>
+      current.map((withdrawal, currentIndex) =>
+        currentIndex === index ? value : withdrawal,
+      ),
+    );
+  }
+
+  function addWithdrawal() {
+    setWithdrawalInputs((current) => [...current, ""]);
+  }
+
+  function removeWithdrawal(index: number) {
+    setWithdrawalInputs((current) =>
+      current.filter((_, currentIndex) => currentIndex !== index),
+    );
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const parsedWithdrawals = withdrawalInputs.map((value) => Number(value));
+
+    if (
+      parsedWithdrawals.length === 0 ||
+      parsedWithdrawals.some(
+        (amount) => !Number.isInteger(amount) || amount <= 0,
+      )
+    ) {
+      setSummary(null);
+      setErrorMessage("Enter at least one withdrawal amount greater than 0.");
+      return;
+    }
+
     setLoading(true);
     setErrorMessage(null);
 
     try {
-      const response = await createAtmSession(pin);
+      const response = await createAtmSession(pin, parsedWithdrawals);
       setSummary(response);
     } catch (error) {
       const message =
@@ -170,6 +192,43 @@ export function AtmPage() {
               />
             </label>
 
+            <div className="field">
+              <span>Withdrawal amounts</span>
+              <div className="withdrawal-inputs">
+                {withdrawalInputs.map((amount, index) => (
+                  <div className="withdrawal-input-row" key={`withdrawal-${index}`}>
+                    <input
+                      inputMode="numeric"
+                      min="1"
+                      onChange={(event) =>
+                        updateWithdrawal(index, event.currentTarget.value)
+                      }
+                      placeholder="Amount"
+                      step="1"
+                      type="number"
+                      value={amount}
+                    />
+                    <button
+                      className="secondary-button"
+                      disabled={loading || withdrawalInputs.length === 1}
+                      onClick={() => removeWithdrawal(index)}
+                      type="button"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                className="secondary-button secondary-button--ghost"
+                disabled={loading}
+                onClick={addWithdrawal}
+                type="button"
+              >
+                Add withdrawal
+              </button>
+            </div>
+
             <button className="primary-button" disabled={loading} type="submit">
               {loading ? "Processing..." : "Start ATM session"}
             </button>
@@ -184,12 +243,8 @@ export function AtmPage() {
         >
           <div className="constraints-grid">
             <div>
-              <h3>Withdrawal sequence</h3>
-              <ol className="sequence-list">
-                {withdrawals.map((amount) => (
-                  <li key={amount}>{formatCurrency(amount)}</li>
-                ))}
-              </ol>
+              <h3>Supported notes</h3>
+              <p>Amounts must be dispensable using fixed £20, £10, and £5 notes.</p>
             </div>
 
             <div>

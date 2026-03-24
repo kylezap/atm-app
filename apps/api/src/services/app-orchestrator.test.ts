@@ -6,6 +6,7 @@ import type { WithdrawalService } from "./withdrawal-service";
 
 describe("createAtmOrchestrator", () => {
   it("uses the withdrawal sequence result for ending balance and remaining notes", async () => {
+    const withdrawals = [140, 50, 90];
     const pinService: PinService = {
       authenticate: vi.fn().mockResolvedValue({ currentBalance: 220 }),
     };
@@ -32,16 +33,12 @@ describe("createAtmOrchestrator", () => {
       withdrawalService,
     });
 
-    const summary = await orchestrator.processSession({ pin: "1111" });
+    const summary = await orchestrator.processSession({ pin: "1111", withdrawals });
 
     expect(summary.startingBalance).toBe(220);
     expect(summary.endingBalance).toBe(80);
     expect(summary.remainingNotes).toEqual({ 5: 0, 10: 11, 20: 3 });
     expect(summary.withdrawals).toHaveLength(1);
-    expect(withdrawalService.processSequence).toHaveBeenCalledWith(220, [
-      140,
-      50,
-      90,
-    ]);
+    expect(withdrawalService.processSequence).toHaveBeenCalledWith(220, withdrawals);
   });
 });

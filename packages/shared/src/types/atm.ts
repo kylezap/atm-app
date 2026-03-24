@@ -8,6 +8,7 @@ export type NoteCounts = Record<Denomination, number>;
 
 export interface PinRequest {
   pin: string;
+  withdrawals: number[];
 }
 
 export interface PinApiSuccessResponse {

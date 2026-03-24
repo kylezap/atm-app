@@ -4,6 +4,7 @@ import { ERROR_CODES } from "../constants/atm";
 
 export const pinRequestSchema = z.object({
   pin: z.string().min(1),
+  withdrawals: z.array(z.number().int().positive()).min(1),
 });
 
 export const pinApiSuccessResponseSchema = z.object({

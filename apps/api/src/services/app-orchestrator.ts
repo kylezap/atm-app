@@ -1,4 +1,3 @@
-import { DEFAULT_WITHDRAWAL_SEQUENCE } from "@atm/shared";
 import type { AtmSessionSummary } from "@atm/shared";
 
 import type { PinService } from "./pin-service";
@@ -18,7 +17,7 @@ export function createAtmOrchestrator(
       const authenticationResult = await options.pinService.authenticate(input.pin);
       const sequenceResult = await options.withdrawalService.processSequence(
         authenticationResult.currentBalance,
-        [...DEFAULT_WITHDRAWAL_SEQUENCE],
+        [...input.withdrawals],
       );
 
       return {
