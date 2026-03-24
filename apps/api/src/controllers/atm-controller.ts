@@ -4,6 +4,9 @@ import type { NextFunction, Request, Response } from "express";
 import type { AtmOrchestrator } from "../types/atm";
 import { HttpError } from "../lib/http-error";
 
+// Controller is responsible for parsing the request, validating the data, and orchestrating the business logic.
+// It is the entry point for the ATM application and is responsible for handling the request and response.
+
 export function createAtmController(orchestrator: AtmOrchestrator) {
   return {
     async createSession(
