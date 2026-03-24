@@ -16,7 +16,7 @@ export function createAtmOrchestrator(
   return {
     async processSession(input: ProcessSessionInput): Promise<AtmSessionSummary> {
       const authenticationResult = await options.pinService.authenticate(input.pin);
-      const withdrawals = await options.withdrawalService.processSequence(
+      const sequenceResult = await options.withdrawalService.processSequence(
         authenticationResult.currentBalance,
         [...DEFAULT_WITHDRAWAL_SEQUENCE],
       );
@@ -24,9 +24,9 @@ export function createAtmOrchestrator(
       return {
         authenticated: true,
         startingBalance: authenticationResult.currentBalance,
-        withdrawals,
-        endingBalance: authenticationResult.currentBalance,
-        remainingNotes: { 5: 0, 10: 0, 20: 0 },
+        withdrawals: sequenceResult.withdrawals,
+        endingBalance: sequenceResult.endingBalance,
+        remainingNotes: sequenceResult.remainingNotes,
       };
     },
   };

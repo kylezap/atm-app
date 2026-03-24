@@ -1,15 +1,18 @@
 import type {
   NoteCounts,
   SuccessfulWithdrawalResult,
-  WithdrawalResult,
 } from "@atm/shared";
 
 import type { AtmInventory } from "../domain/atm-inventory";
 import type { NoteDispenser } from "../domain/note-dispenser";
 import { NotImplementedError } from "../lib/http-error";
+import type { WithdrawalSequenceResult } from "../types/atm";
 
 export interface WithdrawalService {
-  processSequence(balance: number, withdrawals: number[]): Promise<WithdrawalResult[]>;
+  processSequence(
+    balance: number,
+    withdrawals: number[],
+  ): Promise<WithdrawalSequenceResult>;
 }
 
 interface CreateWithdrawalServiceOptions {
@@ -33,6 +36,14 @@ function createPlaceholderSuccess(balance: number): SuccessfulWithdrawalResult {
   };
 }
 
+function createPlaceholderSequenceResult(balance: number): WithdrawalSequenceResult {
+  return {
+    withdrawals: [createPlaceholderSuccess(balance)],
+    endingBalance: balance,
+    remainingNotes: createEmptyNotes(),
+  };
+}
+
 export function createWithdrawalService(
   options: CreateWithdrawalServiceOptions,
 ): WithdrawalService {
@@ -40,7 +51,7 @@ export function createWithdrawalService(
     async processSequence(balance: number, _withdrawals: number[]) {
       options.inventory.getRemainingNotes();
       options.noteDispenser.selectNotes(0, createEmptyNotes());
-      createPlaceholderSuccess(balance);
+      createPlaceholderSequenceResult(balance);
 
       throw new NotImplementedError(
         "Withdrawal processing has not been implemented yet.",
