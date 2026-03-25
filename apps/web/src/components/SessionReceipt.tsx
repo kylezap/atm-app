@@ -35,20 +35,17 @@ export function SessionReceipt({ result }: SessionReceiptProps) {
                 : "receipt-panel__balance"
             }
           >
-            {formatCurrency(result.balanceBefore)} to {formatCurrency(result.balanceAfter)}
+            {formatCurrency(result.balanceBefore)} to{" "}
+            {formatCurrency(result.balanceAfter)}
           </p>
         </div>
         <div>
           <p className="receipt-panel__label">Dispensed notes</p>
           <NoteCountList notes={result.dispensedNotes} />
         </div>
-        <div>
-          <p className="receipt-panel__label">Notes remaining</p>
-          <NoteCountList notes={result.remainingNotes} />
-        </div>
       </div>
       {result.overdraftWarning ? (
-        <p className="atm-helper atm-helper--warning">
+        <p className="atm-helper--error">
           Account remains in overdraft after this withdrawal.
         </p>
       ) : null}

@@ -17,7 +17,7 @@ export function formatFailureReason(reason: ErrorCode) {
     case "INVALID_PIN_RESPONSE":
       return "The PIN service returned an unreadable balance.";
     case "OVERDRAFT_LIMIT_EXCEEDED":
-      return "This withdrawal exceeds the overdraft floor.";
+      return "This withdrawal exceeds the overdraft limit of -£100.";
     case "INSUFFICIENT_NOTES":
       return "The machine cannot make this amount exactly with the notes left.";
   }

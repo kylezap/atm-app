@@ -22,7 +22,7 @@ export function IdleScreen({ onStartSession }: IdleScreenProps) {
             onClick={onStartSession}
             type="button"
           >
-            Start session
+            Log in
           </button>
         </div>
       }

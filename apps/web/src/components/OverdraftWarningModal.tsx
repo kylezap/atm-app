@@ -25,7 +25,7 @@ export function OverdraftWarningModal({
         <p className="atm-modal__eyebrow">Overdraft warning</p>
         <h3 id="overdraft-warning-title">This withdrawal will put the account into overdraft</h3>
         <p>
-          Proceed with {formatCurrency(pendingAmount)} and continue with a balance of{" "}
+          Proceed with {formatCurrency(pendingAmount)} and continue with a <br/>balance of{" "}
           {formatCurrency((currentBalance ?? 0) - pendingAmount)}?
         </p>
         <div className="atm-actions">

@@ -29,7 +29,7 @@ export function CustomAmountScreen({
       machineState="KEYPAD"
       screenLabel="Other amount"
       headline="Enter your withdrawal amount"
-      lead="The ATM only dispenses exact amounts in £5 steps."
+      lead="The ATM only dispenses exact amounts in £5 increments."
       sessionLabel="Single withdrawal session"
       showAuthenticatedSidebar
       footer={

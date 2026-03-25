@@ -67,14 +67,20 @@ export function PinScreen({
                 onSubmit();
               }
             }}
-            placeholder="1111"
+            placeholder="****"
             type="password"
             value={pin}
           />
         </label>
         <PinSlots pin={pin} />
         <p className="atm-helper">Demo PIN: 1111. Press Enter to verify immediately.</p>
-        {pinError ? <p className="atm-helper atm-helper--error">{pinError}</p> : null}
+        <p
+          aria-live="polite"
+          className="atm-helper atm-helper--error"
+          style={{ visibility: pinError ? "visible" : "hidden" }}
+        >
+          {pinError ?? "\u00a0"}
+        </p>
       </div>
     </AtmScreenLayout>
   );

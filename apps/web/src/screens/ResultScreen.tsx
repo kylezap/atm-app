@@ -33,7 +33,7 @@ export function ResultScreen({ result, onFinish, onMainMenu }: ResultScreenProps
             Main menu
           </button>
           <button className="atm-action-button" onClick={onFinish} type="button">
-            Finish session
+            Sign out
           </button>
         </div>
       }

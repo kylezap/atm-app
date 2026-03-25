@@ -27,16 +27,19 @@ export function Keypad({
     <div className="keypad-panel">
       <label className="atm-field" htmlFor="custom-amount">
         <span>Custom amount</span>
-        <input
-          aria-describedby="custom-amount-helper"
-          autoComplete="off"
-          disabled={disabled}
-          id="custom-amount"
-          inputMode="numeric"
-          onChange={(event) => onValueChange(event.currentTarget.value)}
-          placeholder="0"
-          value={value}
-        />
+        <div className="atm-field__input-wrapper">
+          <span aria-hidden="true" className="atm-field__prefix">£</span>
+          <input
+            aria-describedby="custom-amount-helper"
+            autoComplete="off"
+            disabled={disabled}
+            id="custom-amount"
+            inputMode="numeric"
+            onChange={(event) => onValueChange(event.currentTarget.value)}
+            placeholder="0"
+            value={value}
+          />
+        </div>
       </label>
 
       <p

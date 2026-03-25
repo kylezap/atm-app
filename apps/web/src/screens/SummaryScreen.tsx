@@ -27,10 +27,10 @@ export function SummaryScreen({ summary, onStartNewSession }: SummaryScreenProps
     >
       <div className="summary-screen">
         <div className="summary-screen__totals">
-          <article className="summary-stat">
+          {/* <article className="summary-stat">
             <p className="summary-stat__label">Remaining notes</p>
             <NoteCountList notes={summary.remainingNotes} />
-          </article>
+          </article> */}
         </div>
 
         <div className="summary-screen__receipts">

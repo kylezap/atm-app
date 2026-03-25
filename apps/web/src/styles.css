@@ -215,9 +215,22 @@ input:focus-visible {
 }
 
 .atm-aside-block {
+  display: grid;
+  gap: 16px;
   padding: 16px;
   border: 3px solid rgba(255, 255, 255, 0.08);
   background: rgba(0, 0, 0, 0.22);
+}
+
+.atm-aside-block__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.atm-aside-block__name {
+  color: #f7f7ea;
 }
 
 .atm-aside-block--balance {
@@ -246,7 +259,7 @@ input:focus-visible {
 .atm-bullet-list {
   display: grid;
   gap: 10px;
-  margin: 16px 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -271,7 +284,6 @@ input:focus-visible {
 .sequence-list__item span,
 .atm-bullet-list li {
   color: var(--muted);
-  font-size: 0.92rem;
 }
 
 .sequence-list__item--active {
@@ -396,9 +408,24 @@ input:focus-visible {
   letter-spacing: 0.12em;
 }
 
+.atm-field__input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.atm-field__prefix {
+  position: absolute;
+  left: 20px;
+  color: var(--muted);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  pointer-events: none;
+  user-select: none;
+}
+
 .atm-field input {
   width: 100%;
-  padding: 18px 20px;
+  padding: 18px 20px 18px 44px;
   color: #f4fbea;
   background: #0b120d;
   font-size: clamp(1.4rem, 3vw, 2rem);
@@ -424,6 +451,10 @@ input:focus-visible {
 .atm-helper {
   margin: 0;
   color: var(--muted);
+}
+
+.keypad-panel .atm-helper {
+  min-height: calc(2lh);
 }
 
 .atm-helper--error {

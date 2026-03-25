@@ -11,7 +11,6 @@ import { PinSuccessScreen } from "../screens/PinSuccessScreen";
 import { ProcessingScreen } from "../screens/ProcessingScreen";
 import { QuickCashScreen } from "../screens/QuickCashScreen";
 import { ResultScreen } from "../screens/ResultScreen";
-import { SummaryScreen } from "../screens/SummaryScreen";
 import { TransactionsScreen } from "../screens/TransactionsScreen";
 
 export function AtmPage() {
@@ -105,15 +104,9 @@ export function AtmPage() {
       return (
         <ResultScreen
           result={flow.currentResult}
-          onFinish={flow.advanceResult}
+          onFinish={flow.resetSession}
           onMainMenu={flow.returnToMainMenu}
         />
       );
-    case "summary":
-      if (!flow.summary) {
-        throw new Error("Summary screen requires a completed session.");
-      }
-
-      return <SummaryScreen summary={flow.summary} onStartNewSession={flow.resetSession} />;
   }
 }
