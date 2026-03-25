@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATM App — Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 44px 24px 60px;
+  }
+
+  .header {
+    width: 780px;
+    margin-bottom: 24px;
+  }
+
+  h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #00d4ff;
+    margin-bottom: 5px;
+  }
+
+  .sub {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 11px;
+    color: #475569;
+    letter-spacing: 0.04em;
+  }
+
+  svg {
+    display: block;
+    overflow: visible;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ATM App — Architecture</h1>
+  <p class="sub">npm workspaces monorepo · Node/Express API · React/Vite SPA · @atm/shared contract</p>
+</div>
+
+<svg viewBox="0 0 780 860" width="780" height="860" xmlns="http://www.w3.org/2000/svg"
+     font-family="'IBM Plex Mono', monospace">
+
+  <defs>
+    <!-- Arrowhead — works for any direction via orient="auto" -->
+    <marker id="ah" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <polygon points="0 0, 6 3, 0 6" fill="#607080" opacity="0.9"/>
+    </marker>
+    <marker id="ah-purple" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <polygon points="0 0, 6 3, 0 6" fill="#a78bfa" opacity="0.7"/>
+    </marker>
+    <marker id="ah-green" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <polygon points="0 0, 6 3, 0 6" fill="#22c55e" opacity="0.7"/>
+    </marker>
+    <marker id="ah-yellow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <polygon points="0 0, 6 3, 0 6" fill="#eab308" opacity="0.7"/>
+    </marker>
+  </defs>
+
+  <!-- ═══════ BACKGROUND ═══════ -->
+  <rect width="780" height="860" fill="#0a0a0f"/>
+
+  <!-- ═══════ LAYER SEPARATORS (partial width left of @atm/shared) ═══════ -->
+
+  <!-- CLIENT (y=38) — partial -->
+  <line x1="20" y1="38" x2="518" y2="38" stroke="#1e1e2e" stroke-width="1"/>
+  <text x="20" y="34" font-size="8" fill="#334155" letter-spacing="0.2em">CLIENT</text>
+
+  <!-- API (y=208) — partial -->
+  <line x1="20" y1="208" x2="518" y2="208" stroke="#1e1e2e" stroke-width="1"/>
+  <text x="20" y="204" font-size="8" fill="#334155" letter-spacing="0.2em">API</text>
+
+  <!-- SERVICE (y=390) — full width (shared box ends at y=295) -->
+  <line x1="20" y1="390" x2="760" y2="390" stroke="#1e1e2e" stroke-width="1"/>
+  <text x="20" y="386" font-size="8" fill="#334155" letter-spacing="0.2em">SERVICE</text>
+
+  <!-- CLIENT / DOMAIN (y=562) -->
+  <line x1="20" y1="562" x2="760" y2="562" stroke="#1e1e2e" stroke-width="1"/>
+  <text x="20" y="558" font-size="8" fill="#334155" letter-spacing="0.2em">CLIENT · DOMAIN</text>
+
+  <!-- DOMAIN / EXTERNAL (y=728) -->
+  <line x1="20" y1="728" x2="760" y2="728" stroke="#1e1e2e" stroke-width="1"/>
+  <text x="20" y="724" font-size="8" fill="#334155" letter-spacing="0.2em">DOMAIN · EXTERNAL</text>
+
+
+  <!-- ═══════ CONNECTION ARROWS ═══════ -->
+
+  <!-- 1. Browser → Express (straight down) -->
+  <path d="M362,150 V218" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- 2. Browser right → @atm/shared left (dashed, purple) -->
+  <path d="M493,97 H528" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-opacity="0.6"
+        stroke-dasharray="4 3" marker-end="url(#ah-purple)"/>
+
+  <!-- 3. Express right → @atm/shared left (dashed, purple) -->
+  <path d="M493,268 H528" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-opacity="0.6"
+        stroke-dasharray="4 3" marker-end="url(#ah-purple)"/>
+
+  <!-- 4. Express left → PinService top (L-shape) -->
+  <path d="M228,268 H117 V400" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- 5. Express → Orchestrator (near-vertical, small jog) -->
+  <path d="M362,318 V355 H343 V400" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- 6. PinService → PinApiClient (straight down) -->
+  <path d="M117,498 V572" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- 7. Orchestrator → WithdrawalService (straight down) -->
+  <path d="M343,498 V572" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- 8. PinApiClient → External (straight down, yellow) -->
+  <path d="M117,658 V738" fill="none" stroke="#eab308" stroke-width="1.5" stroke-opacity="0.6" marker-end="url(#ah-yellow)"/>
+
+  <!-- 9+10. WithdrawalService → Inventory + Dispenser fork (green) -->
+  <!-- shared trunk -->
+  <path d="M343,658 V700" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-opacity="0.55"/>
+  <!-- left branch → Inventory -->
+  <path d="M343,700 H338 V738" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-opacity="0.55" marker-end="url(#ah-green)"/>
+  <!-- right branch → Dispenser -->
+  <path d="M343,700 H527 V738" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-opacity="0.55" marker-end="url(#ah-green)"/>
+
+
+  <!-- ═══════════════════════════════════
+       BOX HELPER: rect + top accent + label + title + sub + divider + items
+       ═══════════════════════════════════ -->
+
+  <!-- ─────── Browser SPA (x=228, y=48, w=265, h=102) BLUE ─────── -->
+  <rect x="228" y="48" width="265" height="102" rx="6"
+        fill="#0e0e18" stroke="#00d4ff" stroke-opacity="0.3" stroke-width="1"/>
+  <rect x="228" y="48" width="265" height="3" rx="1.5" fill="#00d4ff" opacity="0.55"/>
+  <text x="240" y="62" font-size="7.5" fill="#475569" letter-spacing="0.14em">CLIENT · apps/web</text>
+  <text x="240" y="75" font-size="13" font-weight="700" fill="#00d4ff">Browser SPA</text>
+  <text x="240" y="87" font-size="9.5" fill="#4a6075" font-family="'IBM Plex Sans', sans-serif">React 19 · TypeScript · Vite 7</text>
+  <line x1="240" y1="93" x2="481" y2="93" stroke="#1e2a35" stroke-width="0.75"/>
+  <text x="246" y="104" font-size="9" fill="#8daabf">› AtmPage → useAtmFlow (reducer)</text>
+  <text x="246" y="116" font-size="9" fill="#8daabf">› lib/api.ts — fetch to /api/*</text>
+  <text x="246" y="128" font-size="9" fill="#8daabf">› PIN · Balance · Withdraw · Summary</text>
+
+  <!-- ─────── @atm/shared (x=528, y=48, w=218, h=247) PURPLE ─────── -->
+  <rect x="528" y="48" width="218" height="247" rx="6"
+        fill="#0e0e18" stroke="#a78bfa" stroke-opacity="0.38" stroke-width="1"/>
+  <rect x="528" y="48" width="218" height="3" rx="1.5" fill="#a78bfa" opacity="0.55"/>
+  <text x="540" y="62" font-size="7.5" fill="#475569" letter-spacing="0.14em">PACKAGE · packages/shared</text>
+  <text x="540" y="75" font-size="13" font-weight="700" fill="#a78bfa">@atm/shared</text>
+  <text x="540" y="87" font-size="9.5" fill="#4a4070" font-family="'IBM Plex Sans', sans-serif">Contract for both apps</text>
+  <line x1="540" y1="93" x2="734" y2="93" stroke="#1e1e2e" stroke-width="0.75"/>
+  <text x="546" y="104" font-size="9" fill="#8a7db0">› Zod schemas · TypeScript types</text>
+  <text x="546" y="116" font-size="9" fill="#8a7db0">› SUPPORTED_DENOMINATIONS</text>
+  <text x="546" y="128" font-size="9" fill="#8a7db0">› INITIAL_NOTE_COUNTS</text>
+  <text x="546" y="140" font-size="9" fill="#8a7db0">› OVERDRAFT_LIMIT · ERROR_CODES</text>
+  <text x="546" y="152" font-size="9" fill="#8a7db0">› PIN_API_URL</text>
+  <text x="546" y="164" font-size="9" fill="#8a7db0">› PinRequest · NoteCounts · …</text>
+  <line x1="540" y1="172" x2="734" y2="172" stroke="#1e1e2e" stroke-width="0.75"/>
+  <text x="546" y="183" font-size="8.5" fill="#554e7a" font-family="'IBM Plex Sans', sans-serif">
+    Imported by apps/api + apps/web
+  </text>
+
+  <!-- ─────── Express API (x=228, y=218, w=265, h=100) ORANGE ─────── -->
+  <rect x="228" y="218" width="265" height="100" rx="6"
+        fill="#0e0e18" stroke="#ff6b35" stroke-opacity="0.32" stroke-width="1"/>
+  <rect x="228" y="218" width="265" height="3" rx="1.5" fill="#ff6b35" opacity="0.55"/>
+  <text x="240" y="232" font-size="7.5" fill="#475569" letter-spacing="0.14em">HTTP SERVER · apps/api</text>
+  <text x="240" y="245" font-size="13" font-weight="700" fill="#ff6b35">Express API
+    <tspan font-size="9" fill="#475569" dx="2">:3001</tspan>
+  </text>
+  <text x="240" y="257" font-size="9.5" fill="#6a4030" font-family="'IBM Plex Sans', sans-serif">Express 5 · Node.js · CORS · tsx watch</text>
+  <line x1="240" y1="263" x2="481" y2="263" stroke="#2a1e14" stroke-width="0.75"/>
+  <text x="246" y="274" font-size="9" fill="#b07560">› GET  /api/health/</text>
+  <text x="246" y="286" font-size="9" fill="#b07560">› POST /api/atm/pin → PinVerificationResult</text>
+  <text x="246" y="298" font-size="9" fill="#b07560">› POST /api/atm/session → AtmSessionSummary</text>
+
+  <!-- ─────── PinService (x=20, y=400, w=195, h=98) ORANGE ─────── -->
+  <rect x="20" y="400" width="195" height="98" rx="6"
+        fill="#0e0e18" stroke="#ff6b35" stroke-opacity="0.32" stroke-width="1"/>
+  <rect x="20" y="400" width="195" height="3" rx="1.5" fill="#ff6b35" opacity="0.55"/>
+  <text x="32" y="414" font-size="7.5" fill="#475569" letter-spacing="0.14em">SERVICE</text>
+  <text x="32" y="427" font-size="13" font-weight="700" fill="#ff6b35">PinService</text>
+  <text x="32" y="439" font-size="9.5" fill="#6a4030" font-family="'IBM Plex Sans', sans-serif">Auth + balance cache + history</text>
+  <line x1="32" y1="445" x2="203" y2="445" stroke="#2a1e14" stroke-width="0.75"/>
+  <text x="38" y="456" font-size="9" fill="#b07560">› Calls PinApiClient</text>
+  <text x="38" y="468" font-size="9" fill="#b07560">› Caches balance in-memory</text>
+  <text x="38" y="480" font-size="9" fill="#b07560">› Rolling history (max 5 tx)</text>
+
+  <!-- ─────── AtmOrchestrator (x=245, y=400, w=195, h=98) ORANGE ─────── -->
+  <rect x="245" y="400" width="195" height="98" rx="6"
+        fill="#0e0e18" stroke="#ff6b35" stroke-opacity="0.32" stroke-width="1"/>
+  <rect x="245" y="400" width="195" height="3" rx="1.5" fill="#ff6b35" opacity="0.55"/>
+  <text x="257" y="414" font-size="7.5" fill="#475569" letter-spacing="0.14em">SERVICE</text>
+  <text x="257" y="427" font-size="12" font-weight="700" fill="#ff6b35">AtmOrchestrator</text>
+  <text x="257" y="439" font-size="9.5" fill="#6a4030" font-family="'IBM Plex Sans', sans-serif">Coordinates full ATM session</text>
+  <line x1="257" y1="445" x2="428" y2="445" stroke="#2a1e14" stroke-width="0.75"/>
+  <text x="263" y="456" font-size="9" fill="#b07560">› PIN validate → process withdrawals</text>
+  <text x="263" y="468" font-size="9" fill="#b07560">› Updates PinService post-session</text>
+  <text x="263" y="480" font-size="9" fill="#b07560">› Returns AtmSessionSummary</text>
+
+  <!-- ─────── PinApiClient (x=20, y=572, w=195, h=86) YELLOW ─────── -->
+  <rect x="20" y="572" width="195" height="86" rx="6"
+        fill="#0e0e18" stroke="#eab308" stroke-opacity="0.32" stroke-width="1"/>
+  <rect x="20" y="572" width="195" height="3" rx="1.5" fill="#eab308" opacity="0.5"/>
+  <text x="32" y="586" font-size="7.5" fill="#475569" letter-spacing="0.14em">CLIENT</text>
+  <text x="32" y="599" font-size="13" font-weight="700" fill="#eab308">PinApiClient</text>
+  <text x="32" y="611" font-size="9.5" fill="#5a4a10" font-family="'IBM Plex Sans', sans-serif">External PIN API adapter</text>
+  <line x1="32" y1="617" x2="203" y2="617" stroke="#2a2410" stroke-width="0.75"/>
+  <text x="38" y="628" font-size="9" fill="#a89040">› POST → screencloudsolutions</text>
+  <text x="38" y="640" font-size="9" fill="#a89040">› 403 → InvalidPinError</text>
+  <text x="38" y="652" font-size="9" fill="#a89040">› bad JSON → InvalidPinResponseError</text>
+
+  <!-- ─────── WithdrawalService (x=245, y=572, w=195, h=86) ORANGE ─────── -->
+  <rect x="245" y="572" width="195" height="86" rx="6"
+        fill="#0e0e18" stroke="#ff6b35" stroke-opacity="0.32" stroke-width="1"/>
+  <rect x="245" y="572" width="195" height="3" rx="1.5" fill="#ff6b35" opacity="0.55"/>
+  <text x="257" y="586" font-size="7.5" fill="#475569" letter-spacing="0.14em">SERVICE</text>
+  <text x="257" y="599" font-size="12" font-weight="700" fill="#ff6b35">WithdrawalService</text>
+  <text x="257" y="611" font-size="9.5" fill="#6a4030" font-family="'IBM Plex Sans', sans-serif">Processes withdrawals in sequence</text>
+  <line x1="257" y1="617" x2="428" y2="617" stroke="#2a1e14" stroke-width="0.75"/>
+  <text x="263" y="628" font-size="9" fill="#b07560">› Stops on first failure</text>
+  <text x="263" y="640" font-size="9" fill="#b07560">› Checks OVERDRAFT_LIMIT (-£100)</text>
+  <text x="263" y="652" font-size="9" fill="#b07560">› Delegates to domain layer</text>
+
+  <!-- ─────── External PIN API (x=20, y=738, w=195, h=80) YELLOW ─────── -->
+  <rect x="20" y="738" width="195" height="80" rx="6"
+        fill="#0e0e18" stroke="#eab308" stroke-opacity="0.32" stroke-width="1"/>
+  <rect x="20" y="738" width="195" height="3" rx="1.5" fill="#eab308" opacity="0.5"/>
+  <text x="32" y="752" font-size="7.5" fill="#475569" letter-spacing="0.14em">EXTERNAL</text>
+  <text x="32" y="765" font-size="12" font-weight="700" fill="#eab308">Screencloud PIN API</text>
+  <text x="32" y="777" font-size="9.5" fill="#5a4a10" font-family="'IBM Plex Sans', sans-serif">HTTPS · POST /api/pin</text>
+  <line x1="32" y1="783" x2="203" y2="783" stroke="#2a2410" stroke-width="0.75"/>
+  <text x="38" y="794" font-size="9" fill="#a89040">› pinapi.screencloudsolutions.com</text>
+  <text x="38" y="806" font-size="9" fill="#a89040">› Returns { balance, … }</text>
+
+  <!-- ─────── AtmInventory (x=248, y=738, w=178, h=80) GREEN ─────── -->
+  <rect x="248" y="738" width="178" height="80" rx="6"
+        fill="#0e0e18" stroke="#22c55e" stroke-opacity="0.32" stroke-width="1"/>
+  <rect x="248" y="738" width="178" height="3" rx="1.5" fill="#22c55e" opacity="0.5"/>
+  <text x="260" y="752" font-size="7.5" fill="#475569" letter-spacing="0.14em">DOMAIN</text>
+  <text x="260" y="765" font-size="13" font-weight="700" fill="#22c55e">AtmInventory</text>
+  <text x="260" y="777" font-size="9.5" fill="#1a4028" font-family="'IBM Plex Sans', sans-serif">In-memory cassette state</text>
+  <line x1="260" y1="783" x2="414" y2="783" stroke="#102015" stroke-width="0.75"/>
+  <text x="266" y="794" font-size="9" fill="#4a8060">› Mutable { £5: n, £10: n, £20: n }</text>
+  <text x="266" y="806" font-size="9" fill="#4a8060">› Resets on API process restart</text>
+
+  <!-- ─────── NoteDispenser (x=438, y=738, w=178, h=80) GREEN ─────── -->
+  <rect x="438" y="738" width="178" height="80" rx="6"
+        fill="#0e0e18" stroke="#22c55e" stroke-opacity="0.32" stroke-width="1"/>
+  <rect x="438" y="738" width="178" height="3" rx="1.5" fill="#22c55e" opacity="0.5"/>
+  <text x="450" y="752" font-size="7.5" fill="#475569" letter-spacing="0.14em">DOMAIN</text>
+  <text x="450" y="765" font-size="13" font-weight="700" fill="#22c55e">NoteDispenser</text>
+  <text x="450" y="777" font-size="9.5" fill="#1a4028" font-family="'IBM Plex Sans', sans-serif">Optimal note selection</text>
+  <line x1="450" y1="783" x2="604" y2="783" stroke="#102015" stroke-width="0.75"/>
+  <text x="456" y="794" font-size="9" fill="#4a8060">› Enumerate exact combos</text>
+  <text x="456" y="806" font-size="9" fill="#4a8060">› Min spread → fewer notes first</text>
+
+
+  <!-- ═══════ LEGEND ═══════ -->
+  <rect x="528" y="316" width="218" height="68" rx="5"
+        fill="#0a0c12" stroke="#1e1e2e" stroke-width="1"/>
+  <text x="540" y="330" font-size="7.5" fill="#334155" letter-spacing="0.18em">LEGEND</text>
+  <!-- row 1 -->
+  <rect x="540" y="336" width="8" height="8" rx="1.5" fill="#00d4ff" opacity="0.6"/>
+  <text x="552" y="343" font-size="8.5" fill="#64748b">Browser / Vite SPA</text>
+  <rect x="540" y="349" width="8" height="8" rx="1.5" fill="#ff6b35" opacity="0.6"/>
+  <text x="552" y="356" font-size="8.5" fill="#64748b">Express API + Services</text>
+  <rect x="540" y="362" width="8" height="8" rx="1.5" fill="#a78bfa" opacity="0.6"/>
+  <text x="552" y="369" font-size="8.5" fill="#64748b">@atm/shared contract</text>
+  <!-- row 2 -->
+  <rect x="648" y="336" width="8" height="8" rx="1.5" fill="#22c55e" opacity="0.6"/>
+  <text x="660" y="343" font-size="8.5" fill="#64748b">Domain (in-memory)</text>
+  <rect x="648" y="349" width="8" height="8" rx="1.5" fill="#eab308" opacity="0.6"/>
+  <text x="660" y="356" font-size="8.5" fill="#64748b">External / 3rd party</text>
+
+  <!-- ═══════ ARROW LABELS ═══════ -->
+  <text x="370" y="187" font-size="8" fill="#334155" letter-spacing="0.06em">HTTP</text>
+  <text x="498" y="90" font-size="8" fill="#554e7a" letter-spacing="0.04em">imports</text>
+  <text x="498" y="261" font-size="8" fill="#554e7a" letter-spacing="0.04em">imports</text>
+  <text x="138" y="261" font-size="8" fill="#334155" letter-spacing="0.04em">POST /pin</text>
+  <text x="366" y="342" font-size="8" fill="#334155" letter-spacing="0.04em">POST /session</text>
+  <text x="442" y="693" font-size="8" fill="#1a5c30" letter-spacing="0.04em">notes</text>
+  <text x="127" y="718" font-size="8" fill="#706020" letter-spacing="0.04em">HTTPS</text>
+
+</svg>
+</body>
+</html>

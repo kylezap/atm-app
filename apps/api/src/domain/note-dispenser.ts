@@ -1,5 +1,8 @@
 import { SUPPORTED_DENOMINATIONS } from "@atm/shared";
-import type { Denomination, NoteCounts } from "@atm/shared";
+import type { NoteCounts } from "@atm/shared";
+
+// This module is responsible for selecting the best combination of notes to dispense for a given amount.
+// It is used to ensure that the ATM dispenses the correct amount of notes and that the notes are as evenly distributed as possible.
 
 function createEmptyNotes(): NoteCounts {
   return { 5: 0, 10: 0, 20: 0 };
