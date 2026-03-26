@@ -12,21 +12,24 @@ export interface PinService {
 
 export function createPinService(client: PinApiClient): PinService {
   let currentBalance: number | null = null;
+  let authenticatedPin: string | null = null;
   let recentTransactions: WithdrawalResult[] = [];
 
   return {
     async authenticate(pin: string) {
-      if (currentBalance !== null) {
+      if (currentBalance !== null && authenticatedPin === pin) {
         return { currentBalance };
       }
 
       const authenticationResult = await client.verifyPin(pin);
+      authenticatedPin = pin;
       currentBalance = authenticationResult.currentBalance;
 
       return { currentBalance };
     },
 
     resetAuthentication() {
+      authenticatedPin = null;
       currentBalance = null;
     },
 
