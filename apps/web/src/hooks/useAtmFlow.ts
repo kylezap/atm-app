@@ -1,6 +1,6 @@
 import { useEffect, useReducer } from "react";
 
-import { createAtmSession, resetAtmSession, verifyPin } from "../lib/api";
+import { createAtmSession, verifyPin } from "../lib/api";
 import type { AtmSessionSummary } from "@atm/shared";
 import {
   PIN_SUCCESS_TIMEOUT_MS,
@@ -394,12 +394,8 @@ export function useAtmFlow() {
     dispatch({ type: "startSession" });
   }
 
-  async function resetSession() {
-    try {
-      await resetAtmSession();
-    } finally {
-      dispatch({ type: "resetSession" });
-    }
+  function resetSession() {
+    dispatch({ type: "resetSession" });
   }
 
   function updatePin(value: string) {

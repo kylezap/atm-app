@@ -54,13 +54,3 @@ export async function createAtmSession(
 
   return (await response.json()) as AtmSessionSummary;
 }
-
-export async function resetAtmSession(): Promise<void> {
-  const response = await fetch("/api/atm/reset", {
-    method: "POST",
-  });
-
-  if (!response.ok) {
-    throw new Error(await readApiError(response, "Unable to reset ATM session."));
-  }
-}

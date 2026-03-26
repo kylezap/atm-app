@@ -227,4 +227,32 @@ describe("useAtmFlow", () => {
     expect(hook.result.current.pendingAmount).toBeNull();
     expect(hook.result.current.plannedWithdrawals).toEqual([]);
   });
+
+  it("signs out locally without resetting backend ATM state", async () => {
+    verifyPinMock.mockResolvedValue({
+      authenticated: true,
+      currentBalance: 180,
+      recentTransactions: [
+        {
+          amount: 40,
+          status: "success",
+          dispensedNotes: { 5: 0, 10: 0, 20: 2 },
+          balanceBefore: 220,
+          balanceAfter: 180,
+          overdraftWarning: false,
+          remainingNotes: { 5: 4, 10: 15, 20: 5 },
+        },
+      ],
+    });
+
+    const hook = await authenticate();
+
+    act(() => {
+      hook.result.current.resetSession();
+    });
+
+    expect(hook.result.current.screen).toBe("idle");
+    expect(hook.result.current.currentBalance).toBeNull();
+    expect(hook.result.current.transactionHistory).toEqual([]);
+  });
 });

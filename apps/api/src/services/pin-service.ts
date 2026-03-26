@@ -4,7 +4,6 @@ import type { PinApiClient } from "../clients/pin-api-client";
 
 export interface PinService {
   authenticate(pin: string): Promise<PinApiSuccessResponse>;
-  resetAuthentication(): void;
   setCurrentBalance(balance: number): void;
   getRecentTransactions(): WithdrawalResult[];
   recordTransaction(transaction: WithdrawalResult): void;
@@ -26,11 +25,6 @@ export function createPinService(client: PinApiClient): PinService {
       currentBalance = authenticationResult.currentBalance;
 
       return { currentBalance };
-    },
-
-    resetAuthentication() {
-      authenticatedPin = null;
-      currentBalance = null;
     },
 
     setCurrentBalance(balance: number) {

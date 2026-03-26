@@ -38,7 +38,6 @@ describe("createApp", () => {
   it("verifies a PIN immediately through the ATM pin endpoint", async () => {
     const pinService: PinService = {
       authenticate: vi.fn().mockResolvedValue({ currentBalance: 220 }),
-      resetAuthentication: vi.fn(),
       setCurrentBalance: vi.fn(),
       getRecentTransactions: vi.fn().mockReturnValue([
         {
@@ -80,7 +79,6 @@ describe("createApp", () => {
     const app = createApp({
       pinService: {
         authenticate: vi.fn().mockRejectedValue(new InvalidPinError()),
-        resetAuthentication: vi.fn(),
         setCurrentBalance: vi.fn(),
         getRecentTransactions: vi.fn().mockReturnValue([]),
         recordTransaction: vi.fn(),
@@ -123,22 +121,6 @@ describe("createApp", () => {
       pin: "1111",
       withdrawals: [140, 50, 90],
     });
-  });
-
-  it("resets the cached authentication state", async () => {
-    const pinService: PinService = {
-      authenticate: vi.fn(),
-      resetAuthentication: vi.fn(),
-      setCurrentBalance: vi.fn(),
-      getRecentTransactions: vi.fn().mockReturnValue([]),
-      recordTransaction: vi.fn(),
-    };
-    const app = createApp({ pinService });
-
-    const response = await request(app).post("/api/atm/reset").send();
-
-    expect(response.status).toBe(204);
-    expect(pinService.resetAuthentication).toHaveBeenCalledTimes(1);
   });
 
   it("returns 403 when the PIN is invalid", async () => {
