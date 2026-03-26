@@ -28,7 +28,7 @@ export function AtmPage() {
           hasQueuedWithdrawals={flow.plannedWithdrawals.length > 0}
           onPinChange={flow.updatePin}
           onSubmit={() => void flow.submitPin()}
-          onCancel={flow.resetSession}
+          onCancel={() => void flow.resetSession()}
         />
       );
     case "home":
@@ -38,7 +38,7 @@ export function AtmPage() {
           onOpenBalance={flow.openBalance}
           onOpenTransactions={flow.openTransactions}
           onOpenCustomAmount={flow.openCustomAmount}
-          onSignOut={flow.resetSession}
+          onSignOut={() => void flow.resetSession()}
         />
       );
     case "pinSuccess":
@@ -55,7 +55,7 @@ export function AtmPage() {
           onBack={flow.goHome}
           onOtherAmount={flow.openCustomAmount}
           onSelectAmount={flow.selectQuickAmount}
-          onSignOut={flow.resetSession}
+          onSignOut={() => void flow.resetSession()}
         />
       );
     case "customAmount":
@@ -104,7 +104,7 @@ export function AtmPage() {
       return (
         <ResultScreen
           result={flow.currentResult}
-          onFinish={flow.resetSession}
+          onFinish={() => void flow.resetSession()}
           onMainMenu={flow.returnToMainMenu}
         />
       );

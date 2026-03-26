@@ -4,7 +4,7 @@ import { createPinService } from "./pin-service";
 import type { PinApiClient } from "../clients/pin-api-client";
 
 describe("createPinService", () => {
-  it("returns the locally updated balance after a successful withdrawal", async () => {
+  it("verifies upstream once and then returns the locally updated balance", async () => {
     const client: PinApiClient = {
       verifyPin: vi.fn().mockResolvedValue({ currentBalance: 220 }),
     };
@@ -15,7 +15,7 @@ describe("createPinService", () => {
     service.setCurrentBalance(180);
 
     expect(await service.authenticate("1111")).toEqual({ currentBalance: 180 });
-    expect(client.verifyPin).toHaveBeenCalledTimes(2);
+    expect(client.verifyPin).toHaveBeenCalledTimes(1);
   });
 
   it("stores recent transactions in runtime memory", async () => {

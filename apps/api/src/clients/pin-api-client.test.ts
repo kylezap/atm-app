@@ -8,6 +8,48 @@ import {
 } from "../lib/http-error";
 
 describe("createPinApiClient", () => {
+  it("logs the upstream request lifecycle on success", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ currentBalance: 220 }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    );
+    const logger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
+    const client = createPinApiClient({ fetchImpl, logger });
+
+    await expect(client.verifyPin("1111")).resolves.toEqual({
+      currentBalance: 220,
+    });
+
+    expect(logger.info).toHaveBeenCalledWith(
+      "[pin-api] Sending upstream PIN verification request",
+      {
+        url: "https://pinapi.screencloudsolutions.com/api/pin",
+      },
+    );
+    expect(logger.info).toHaveBeenCalledWith(
+      "[pin-api] Upstream PIN verification response received",
+      {
+        status: 200,
+      },
+    );
+    expect(logger.info).toHaveBeenCalledWith(
+      "[pin-api] Upstream PIN verification succeeded",
+      {
+        currentBalance: 220,
+      },
+    );
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
   it("returns the validated balance from the PIN API", async () => {
     const fetchImpl = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ currentBalance: 220 }), {

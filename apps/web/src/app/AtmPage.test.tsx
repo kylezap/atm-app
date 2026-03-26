@@ -92,7 +92,7 @@ async function findMainMenuHeading() {
 }
 
 function expectAuthenticatedSidebar() {
-  expect(screen.getByText(/ash catchem/i)).toBeInTheDocument();
+  expect(screen.getByText(/welcome back michael/i)).toBeInTheDocument();
   expect(screen.queryByText(/^current balance$/i)).toBeNull();
 }
 
@@ -120,6 +120,9 @@ describe("AtmPage", () => {
       .mockResolvedValueOnce({
         ok: true,
         json: async () => successSummary,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
       } as Response);
 
     const user = userEvent.setup();
@@ -127,7 +130,7 @@ describe("AtmPage", () => {
 
     expect(screen.queryByText(/^previous transactions$/i)).toBeNull();
 
-    await user.click(screen.getByRole("button", { name: /start session/i }));
+    await user.click(screen.getByRole("button", { name: /log in/i }));
     expect(screen.queryByText(/^previous transactions$/i)).toBeNull();
     await user.type(screen.getByLabelText(/pin code/i), "1111");
     await user.keyboard("{Enter}");
@@ -163,12 +166,21 @@ describe("AtmPage", () => {
     );
 
     await screen.findByRole("heading", { name: /cash dispensed/i, level: 2 });
-    await user.click(screen.getByRole("button", { name: /finish session/i }));
+    expect(screen.getByText(/£220 to £180/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /sign out/i }));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/atm/reset",
+        expect.objectContaining({
+          method: "POST",
+        }),
+      ),
+    );
 
     expect(
-      await screen.findByRole("heading", { name: /atm session complete/i, level: 2 }),
+      await screen.findByRole("heading", { name: /cash machine ready/i, level: 2 }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/£220 to £180/)).toBeInTheDocument();
   });
 
   it("returns to the main menu from the success screen", async () => {
@@ -190,7 +202,7 @@ describe("AtmPage", () => {
     const user = userEvent.setup();
     render(<AtmPage />);
 
-    await user.click(screen.getByRole("button", { name: /start session/i }));
+    await user.click(screen.getByRole("button", { name: /log in/i }));
     await user.type(screen.getByLabelText(/pin code/i), "1111");
     await user.keyboard("{Enter}");
 
@@ -228,7 +240,7 @@ describe("AtmPage", () => {
     const user = userEvent.setup();
     render(<AtmPage />);
 
-    await user.click(screen.getByRole("button", { name: /start session/i }));
+    await user.click(screen.getByRole("button", { name: /log in/i }));
     await user.type(screen.getByLabelText(/pin code/i), "1111");
     await user.keyboard("{Enter}");
 
@@ -258,7 +270,7 @@ describe("AtmPage", () => {
     const user = userEvent.setup();
     render(<AtmPage />);
 
-    await user.click(screen.getByRole("button", { name: /start session/i }));
+    await user.click(screen.getByRole("button", { name: /log in/i }));
     await user.type(screen.getByLabelText(/pin code/i), "1111");
     await user.keyboard("{Enter}");
 
@@ -267,7 +279,7 @@ describe("AtmPage", () => {
 
     expect(await screen.findByRole("heading", { name: /current balance/i, level: 2 })).toBeInTheDocument();
     expect(screen.getAllByText("£220")).not.toHaveLength(0);
-    expect(screen.getByText(/ash catchem/i)).toBeInTheDocument();
+    expect(screen.getByText(/welcome back michael/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /back to main menu/i }));
 
@@ -289,7 +301,7 @@ describe("AtmPage", () => {
     const user = userEvent.setup();
     render(<AtmPage />);
 
-    await user.click(screen.getByRole("button", { name: /start session/i }));
+    await user.click(screen.getByRole("button", { name: /log in/i }));
     await user.type(screen.getByLabelText(/pin code/i), "1111");
     await user.keyboard("{Enter}");
 
@@ -320,7 +332,7 @@ describe("AtmPage", () => {
     const user = userEvent.setup();
     render(<AtmPage />);
 
-    await user.click(screen.getByRole("button", { name: /start session/i }));
+    await user.click(screen.getByRole("button", { name: /log in/i }));
     await user.type(screen.getByLabelText(/pin code/i), "1111");
     await user.keyboard("{Enter}");
 
@@ -353,7 +365,7 @@ describe("AtmPage", () => {
     const user = userEvent.setup();
     render(<AtmPage />);
 
-    await user.click(screen.getByRole("button", { name: /start session/i }));
+    await user.click(screen.getByRole("button", { name: /log in/i }));
     await user.type(screen.getByLabelText(/pin code/i), "1111");
     await user.keyboard("{Enter}");
 
@@ -403,7 +415,7 @@ describe("AtmPage", () => {
     const user = userEvent.setup();
     render(<AtmPage />);
 
-    await user.click(screen.getByRole("button", { name: /start session/i }));
+    await user.click(screen.getByRole("button", { name: /log in/i }));
     await user.type(screen.getByLabelText(/pin code/i), "1111");
     await user.keyboard("{Enter}");
 
@@ -429,7 +441,7 @@ describe("AtmPage", () => {
     const user = userEvent.setup();
     render(<AtmPage />);
 
-    await user.click(screen.getByRole("button", { name: /start session/i }));
+    await user.click(screen.getByRole("button", { name: /log in/i }));
     await user.type(screen.getByLabelText(/pin code/i), "1111");
     await user.keyboard("{Enter}");
 

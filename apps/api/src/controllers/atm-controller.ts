@@ -52,5 +52,10 @@ export function createAtmController(
         next(error);
       }
     },
+
+    resetSession(_request: Request, response: Response) {
+      pinService.resetAuthentication();
+      response.status(204).send();
+    },
   };
 }
