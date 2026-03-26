@@ -54,3 +54,13 @@ export async function createAtmSession(
 
   return (await response.json()) as AtmSessionSummary;
 }
+
+export async function logoutAtmSession(): Promise<void> {
+  const response = await fetch("/api/atm/logout", {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Unable to end ATM session."));
+  }
+}

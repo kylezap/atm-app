@@ -9,6 +9,7 @@ describe("createAtmOrchestrator", () => {
     const withdrawals = [140, 50, 90];
     const pinService: PinService = {
       authenticate: vi.fn().mockResolvedValue({ currentBalance: 220 }),
+      signOut: vi.fn(),
       setCurrentBalance: vi.fn(),
       getRecentTransactions: vi.fn().mockReturnValue([
         {

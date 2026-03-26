@@ -5,10 +5,12 @@ import { useAtmFlow } from "./useAtmFlow";
 
 const verifyPinMock = vi.fn();
 const createAtmSessionMock = vi.fn();
+const logoutAtmSessionMock = vi.fn();
 
 vi.mock("../lib/api", () => ({
   verifyPin: (...args: unknown[]) => verifyPinMock(...args),
   createAtmSession: (...args: unknown[]) => createAtmSessionMock(...args),
+  logoutAtmSession: (...args: unknown[]) => logoutAtmSessionMock(...args),
 }));
 
 async function authenticate() {
@@ -34,6 +36,7 @@ describe("useAtmFlow", () => {
   beforeEach(() => {
     verifyPinMock.mockReset();
     createAtmSessionMock.mockReset();
+    logoutAtmSessionMock.mockReset();
     vi.useRealTimers();
   });
 
@@ -228,7 +231,7 @@ describe("useAtmFlow", () => {
     expect(hook.result.current.plannedWithdrawals).toEqual([]);
   });
 
-  it("signs out locally without resetting backend ATM state", async () => {
+  it("logs out through the backend and clears local UI state", async () => {
     verifyPinMock.mockResolvedValue({
       authenticated: true,
       currentBalance: 180,
@@ -247,12 +250,13 @@ describe("useAtmFlow", () => {
 
     const hook = await authenticate();
 
-    act(() => {
-      hook.result.current.resetSession();
+    await act(async () => {
+      await hook.result.current.resetSession();
     });
 
     expect(hook.result.current.screen).toBe("idle");
     expect(hook.result.current.currentBalance).toBeNull();
     expect(hook.result.current.transactionHistory).toEqual([]);
+    expect(logoutAtmSessionMock).toHaveBeenCalledTimes(1);
   });
 });

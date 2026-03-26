@@ -120,6 +120,9 @@ describe("AtmPage", () => {
       .mockResolvedValueOnce({
         ok: true,
         json: async () => successSummary,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
       } as Response);
 
     const user = userEvent.setup();
@@ -165,7 +168,15 @@ describe("AtmPage", () => {
     await screen.findByRole("heading", { name: /cash dispensed/i, level: 2 });
     expect(screen.getByText(/£220 to £180/)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /sign out/i }));
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/atm/logout",
+        expect.objectContaining({
+          method: "POST",
+        }),
+      ),
+    );
 
     expect(
       await screen.findByRole("heading", { name: /cash machine ready/i, level: 2 }),

@@ -13,6 +13,7 @@ export function createAtmRoutes(
 
   router.post("/pin", controller.verifyPin);
   router.post("/session", controller.createSession);
+  router.post("/logout", controller.logout);
 
   return router;
 }

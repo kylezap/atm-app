@@ -52,5 +52,10 @@ export function createAtmController(
         next(error);
       }
     },
+
+    logout(_request: Request, response: Response) {
+      pinService.signOut();
+      response.status(204).send();
+    },
   };
 }
